@@ -27,7 +27,8 @@ app.use(cookieSession({
     signed: false
     , secure: false
 }))
-app.use(cors())
+app.use(cors({ origin: 'http://localhost:5173', 
+    credentials: true}))
 app.use(currentUserRouter)
 app.use(singinRouter)
 app.use(singoutRouter)
