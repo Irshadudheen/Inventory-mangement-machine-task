@@ -1,9 +1,11 @@
 import { Route, Routes } from "react-router-dom";
-import {  HomeContent, SalesContent } from "../components/DashboardContent";
+import {  HomeContent } from "../components/DashboardContent";
+
 import InventoryNavbar from "../components/navbar";
 import InventoryHeader from "../components/header";
 import { CustomersContent } from "../components/CustomersContent";
 import { ItemsContent } from "../components/ItemsContent";
+import { SalesContent } from "../components/salesContent";
 
 const dashboard = () => {
   return (

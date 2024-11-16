@@ -10,6 +10,7 @@ import { createCustomerRouter } from "./customer/create-customer";
 import { AllCustomerRouter } from "./customer/get-all-customer";
 import { placeorderRouter } from "./sales/placeorder";
 import { editCustomerRouter } from "./customer/edit-customer";
+import { salesReportRouter } from "./sales/order-customer";
 export {singinRouter,
     singupRouter,
     singoutRouter,
@@ -21,5 +22,6 @@ export {singinRouter,
     createCustomerRouter,
     AllCustomerRouter,
     placeorderRouter,
-    editCustomerRouter
+    editCustomerRouter,
+    salesReportRouter
 }

@@ -72,8 +72,11 @@ export const Table: React.FC<TableProps> = ({
           {data.map((customer, index) => (
             <tr key={index} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                <td className="px-6 py-4">#{String(customer.id).slice(-4)}</td>
-              <td className="px-6 py-4">{customer.name}</td>
-              
+              {customer.name&&<td className="px-6 py-4">{customer.name}</td>}
+              {customer.customer&&<td className="px-6 py-4">{customer.customer}</td>}
+              {customer.items&&<td className="px-6 py-4">{customer.items}</td>}
+              {customer.total&&<td className="px-6 py-4">{customer.total}</td>}
+              {customer.date&&<td className="px-6 py-4">{customer.date}</td>}
               {actions && (
                 <td className="px-6 py-4 text-right">
                   <button
@@ -163,60 +166,7 @@ export const HomeContent = () => {
 };
 
 // Sales Component
-export const SalesContent = () => {
-  const sales = [
-    { id: 'SL001', customer: 'John Doe', items: 3, total: '$899', date: '2024-03-15' },
-    { id: 'SL002', customer: 'Jane Smith', items: 2, total: '$459', date: '2024-03-14' },
-    { id: 'SL003', customer: 'Mike Johnson', items: 5, total: '$1,299', date: '2024-03-13' },
-  ];
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">Sales Overview</h2>
-        <div className="flex space-x-4">
-          <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2">
-            <BarChart3 className="h-5 w-5" />
-            <span>Reports</span>
-          </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2">
-            <Plus className="h-5 w-5" />
-            <span>New Sale</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <DashboardCard
-          title="Total Sales"
-          value="$54,235"
-          trend="up"
-          trendValue="+14.5%"
-          icon={DollarSign}
-        />
-        <DashboardCard
-          title="Average Order Value"
-          value="$285"
-          trend="up"
-          trendValue="+5.2%"
-          icon={TrendingUp}
-        />
-        <DashboardCard
-          title="Orders"
-          value="854"
-          trend="up"
-          trendValue="+8.2%"
-          icon={ShoppingCart}
-        />
-      </div>
-
-      <Table
-        headers={['ID', 'Customer', 'Items', 'Total', 'Date']}
-        data={sales}
-      />
-    </div>
-  );
-};
 
 // Customers Component
 
@@ -225,7 +175,7 @@ export const SalesContent = () => {
 
 export default {
   HomeContent,
-  SalesContent,
+  
 
 
 };
