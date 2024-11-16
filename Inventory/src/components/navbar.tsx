@@ -1,20 +1,15 @@
 import React, { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { currentUser, logout } from '../Api/user';
 
 const InventoryNavbar:React.FC = () => {
-    const handlelogout = async(e)=>{
+const navigate = useNavigate()  
+    const handlelogout = async()=>{
     const response = await logout()
     console.log(response)
+    window.location.href='/login'
     }
-    useEffect(()=>{
-        const fetchTheData= async()=>{
-
-         const response=  await currentUser()
-            console.log(response)
-        }
-        fetchTheData()
-    },[])
+  
   return (
     <nav className="bg-gray-800 text-white w-64 h-screen flex flex-col justify-between">
       <ul className="mt-4 space-y-2">

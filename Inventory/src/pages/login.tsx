@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { userLoing, userSignUp } from '../Api/user';
 
+
 const AuthForm = () => {
+  
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,6 +29,8 @@ const AuthForm = () => {
     if(isLogin){
         const res = await userLoing(formData)
         console.log(res)
+         window.location.href='/'
+       
     }else{
         const response = await userSignUp(formData)
         console.log(response)

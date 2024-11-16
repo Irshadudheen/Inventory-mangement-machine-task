@@ -3,13 +3,15 @@ import { param } from "express-validator";
 import { Item } from "../../models/InventoryItems";
 import { BadRequestError } from "../../errors/bad-request-error";
 import { validateRequest } from "../../middlewares/validateRequest";
+import { requireAuth } from "../../middlewares/require-auth";
+import { currentUser } from "../../middlewares/current-user";
 
 const router = Router()
-router.put('/api/item/edit/:itemId',[
+router.put('/api/item/:itemId',[
     param('itemId').trim()
     .notEmpty()
     .withMessage('itemId is required')
-],validateRequest, async(req:Request, res:Response) => {
+],validateRequest,requireAuth,currentUser, async(req:Request, res:Response) => {
     const {name,description,price,stock}=req.body;
     const {itemId}=req.params
     const item = await Item.findById(itemId);

@@ -24,3 +24,11 @@ export const getAllItem = async()=>{
         throw error
     }
 }
+export const editItem = async(itemData:any,itemId:string)=>{
+    try {
+        const response = await Api.put(`/api/item/${itemId}`,itemData)
+        return response.data
+    } catch (error) {
+        throw error
+    }
+}

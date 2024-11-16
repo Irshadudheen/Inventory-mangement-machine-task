@@ -9,6 +9,7 @@ import { getEachItemRouter } from "./item/get-each-item";
 import { createCustomerRouter } from "./customer/create-customer";
 import { AllCustomerRouter } from "./customer/get-all-customer";
 import { placeorderRouter } from "./sales/placeorder";
+import { editCustomerRouter } from "./customer/edit-customer";
 export {singinRouter,
     singupRouter,
     singoutRouter,
@@ -19,5 +20,6 @@ export {singinRouter,
     getEachItemRouter,
     createCustomerRouter,
     AllCustomerRouter,
-    placeorderRouter
+    placeorderRouter,
+    editCustomerRouter
 }
