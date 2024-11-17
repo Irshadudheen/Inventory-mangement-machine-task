@@ -8,6 +8,8 @@ interface SalesAttrs {
  stock:number;
  price:number;
  totalPrice:number;
+ itemId:string;
+ saleDate:Number;
 }
 
 interface SalesModel extends Model<SalesDoc>{
@@ -20,13 +22,17 @@ interface SalesDoc extends Document{
  stock:number;
  price:number;
  totalPrice:number;
+ itemId:string;
+ saleDate:Number;
 }
 
 const salesScheema = new Schema({
    userId:{requred:true,type:Schema.ObjectId,ref:"User"},
    totalPrice:{required:true,type:Number},
    stock:{required:true,type:Number},
-   customerId:{required:true,type:Schema.ObjectId,ref:'Customer'}
+   customerId:{required:true,type:Schema.ObjectId,ref:'Customer'},
+   itemId:{required:true,type:Schema.ObjectId,ref:'InventoryItems'},
+   saleDate:{required:true,type:Date}
 },{toJSON:{
     transform(doc,ret){
         ret.id=ret._id;

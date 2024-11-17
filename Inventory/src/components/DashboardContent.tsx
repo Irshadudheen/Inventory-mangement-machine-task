@@ -72,21 +72,30 @@ export const Table: React.FC<TableProps> = ({
           {data.map((customer, index) => (
             <tr key={index} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                <td className="px-6 py-4">#{String(customer.id).slice(-4)}</td>
+               
               {customer.name&&<td className="px-6 py-4">{customer.name}</td>}
+              {customer.description&&<td className="px-6 py-4">{customer.description}</td>}
+              {customer.stock&&<td className='px-6 py-4'>{customer.stock}</td>}
+              {customer.price&&<td className='px-6 py-4'>{customer.price}</td>}
               {customer.customer&&<td className="px-6 py-4">{customer.customer}</td>}
               {customer.items&&<td className="px-6 py-4">{customer.items}</td>}
               {customer.total&&<td className="px-6 py-4">{customer.total}</td>}
               {customer.date&&<td className="px-6 py-4">{customer.date}</td>}
-              {actions && (
+              {customer.email&&<td className="px-6 py-4">{customer.email}</td>}
+              {actions && (<>
                 <td className="px-6 py-4 text-right">
                   <button
                     onClick={() => editModal(customer)}
                     className="text-blue-400 hover:text-blue-300 mx-2"
-                  >
+                    >
                     Edit
                   </button>
                 </td>
+              
+                    </>
+                
               )}
+              
             </tr>
           ))}
         </tbody>

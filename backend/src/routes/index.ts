@@ -11,6 +11,8 @@ import { AllCustomerRouter } from "./customer/get-all-customer";
 import { placeorderRouter } from "./sales/placeorder";
 import { editCustomerRouter } from "./customer/edit-customer";
 import { salesReportRouter } from "./sales/order-customer";
+import { editSalesRouter } from "./sales/edit-sales-report";
+import { deleteSaleRouter } from "./sales/delete-sales-report";
 export {singinRouter,
     singupRouter,
     singoutRouter,
@@ -23,5 +25,7 @@ export {singinRouter,
     AllCustomerRouter,
     placeorderRouter,
     editCustomerRouter,
-    salesReportRouter
+    salesReportRouter,
+    editSalesRouter,
+    deleteSaleRouter
 }

@@ -1,7 +1,7 @@
 
 import mongoose from 'mongoose'
-import {app} from './app'
 import 'dotenv/config'
+import {app} from './app'
 const port = 3000
 
 const start = async()=>{

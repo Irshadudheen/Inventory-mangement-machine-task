@@ -7,7 +7,8 @@ import { BadRequestError } from "../../errors/bad-request-error";
 import { Sales } from "../../models/sales";
 
 const router = Router()
-router.post('/api/sales/placeorder/:customerId',[
+router.post('/api/sales/placeorder/:customerId/:itemId',[
+    param('itemId').trim().notEmpty().withMessage('itmeId is required'),
     body('stock').trim().isNumeric().withMessage('Stock must be a number'),
     body('price').trim().isNumeric().withMessage('Price must be a number'),
     body('totalPrice').trim().isNumeric().withMessage('total Price is required'),
@@ -16,11 +17,11 @@ router.post('/api/sales/placeorder/:customerId',[
 
 ],validateRequest,requireAuth,currentUser,async(req:Request,res:Response)=>{
     const {stock,price,totalPrice}=req.body;
-    const {customerId}=req.params
+    const {customerId,itemId}=req.params
     if(!req.currentUser||!req.currentUser.id){
         throw new BadRequestError('user not login')
     }
-    const order = Sales.build({customerId,price,stock,totalPrice,userId:req.currentUser.id})
+    const order = Sales.build({customerId,price,stock,totalPrice,userId:req.currentUser.id,itemId,saleDate:Date.now()})
     await order.save()
     res.status(201).send(order)
 

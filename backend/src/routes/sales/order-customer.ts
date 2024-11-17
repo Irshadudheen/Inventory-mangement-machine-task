@@ -10,7 +10,7 @@ router.get('/api/sales/salesreport',requireAuth,currentUser,
         if(!req.currentUser||!req.currentUser.id){
             throw new BadRequestError('the user not login')
         }
-        const order =await Sales.find({userId:req.currentUser.id}).populate('customerId')
+        const order =await Sales.find({userId:req.currentUser.id}).populate('customerId').populate('itemId')
         res.status(201).send(order)
 
 })

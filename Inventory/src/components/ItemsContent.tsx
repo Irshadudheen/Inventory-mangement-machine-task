@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Filter, Package, Plus, Edit2 } from "lucide-react";
+import { Filter, Package, Plus, Edit2, Search } from "lucide-react";
 import { DashboardCard, Table } from "./DashboardContent";
 import { createItem, editItem, getAllItem } from "../Api/item";
 
@@ -98,6 +98,8 @@ export const ItemsContent = () => {
   const [items, setItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState();
+  const [filteredItem, setFilteredItem] = useState<any>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [modalType, setModalType] = useState<'Add' | 'Edit'>('Add');
   const handleEditItem= (item:any)=>{
     setIsModalOpen(true)
@@ -108,9 +110,18 @@ useEffect(()=>{
   const fetchTheItems=async()=>{
     const response = await getAllItem()
     setItems(response)
+    setFilteredItem(response)
   }
   fetchTheItems()
 },[])
+useEffect(() => {
+  // Filter customers based on the search query
+  const filtered = items.filter((item: any) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  setFilteredItem(filtered);
+}, [searchQuery, items]);
   const handleAddOrEditItem = async(item:any) => {
     if(modalType=='Add'){
       const response = await createItem(item)
@@ -143,10 +154,16 @@ useEffect(()=>{
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Inventory Items</h2>
         <div className="flex space-x-4">
-          <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Filter</span>
-          </button>
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search Customers"
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+          />
+          <Search className="absolute right-3 top-2.5 text-gray-500 h-5 w-5" />
+        </div>
           <button
             onClick={() => {
               setCurrentItem(null);
@@ -185,24 +202,24 @@ useEffect(()=>{
       </div>
 
       <Table
-      editModal={handleEditItem}
-        headers={["ID", "Name", "Category", "Stock", "Price", "Actions"]}
-        data={items.map((item:any) => ({
-          ...item,
-          actions: (
-            <button
-              onClick={() => {
-                setCurrentItem(item);
-                setIsModalOpen(true);
-              }}
-              className="text-blue-600 hover:underline flex items-center space-x-1"
-            >
-              <Edit2 className="h-4 w-4" />
-              <span>Edit</span>
-            </button>
-          ),
-        }))}
-      />
+  editModal={handleEditItem}
+  headers={["ID", "Name", "Description", "Stock", "Price"]}
+  data={filteredItem.map((item: any) => ({
+    ...item,
+    actions: (
+      <button
+        onClick={() => {
+          setCurrentItem(item);
+          setIsModalOpen(true);
+        }}
+        className="text-blue-600 hover:underline flex items-center space-x-1"
+      >
+        <Edit2 className="h-4 w-4" />
+        <span>Edit</span>
+      </button>
+    ),
+  }))}
+/>
 
       <Modal
         isOpen={isModalOpen}

@@ -14,7 +14,9 @@ import {
     AllCustomerRouter,
     placeorderRouter,
     editCustomerRouter,
-    salesReportRouter
+    salesReportRouter,
+    editSalesRouter,
+    deleteSaleRouter
 } from './routes/index'
 import { errorhandler } from './middlewares/error-handler'
 import cookieSession from 'cookie-session'
@@ -29,7 +31,7 @@ app.use(cookieSession({
     signed: false
     , secure: false
 }))
-app.use(cors({ origin: 'http://localhost:5173', 
+app.use(cors({ origin:process.env.clientPort, 
     credentials: true}))
 app.use(currentUserRouter)
 app.use(singinRouter)
@@ -44,6 +46,8 @@ app.use(AllCustomerRouter)
 app.use(placeorderRouter)
 app.use(editCustomerRouter)
 app.use(salesReportRouter)
+app.use(editSalesRouter)
+app.use(deleteSaleRouter)
 app.all('*', async () => {
     throw new NotFoundError();
 })

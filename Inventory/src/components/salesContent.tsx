@@ -1,9 +1,9 @@
 import { BarChart3, DollarSign, Plus, ShoppingCart, TrendingUp } from "lucide-react";
-import { DashboardCard, Table } from "./DashboardContent";
+import { DashboardCard } from "./DashboardContent";
 import { useEffect, useState } from "react";
 import { getAllCustomer } from "../Api/customer";
 import { getAllItem } from "../Api/item";
-import { placeorder } from "../Api/sales";
+import { deleteSaleReport, editSaleReport, placeorder, salesReport } from "../Api/sales";
 const Modal: React.FC<any> = ({
     isOpen,
     onClose,
@@ -29,13 +29,13 @@ const Modal: React.FC<any> = ({
         fetchCustomers()
     }, [])
     const [selectedItemStock, setSelectedItemStock] = useState(null);
-    const [selectedItemPrice,setSelectedItemPrice]=useState(null)
-    const [stockCount,setStockCount]=useState(null)
+    const [selectedItemPrice, setSelectedItemPrice] = useState(null)
+    const [stockCount, setStockCount] = useState(null)
     const handleItemChange = (event) => {
         const selectedItemId = event.target.value;
         const selectedItem = item.find((item) => item.id === selectedItemId);
         setSelectedItemStock(selectedItem?.stock || 0); // Update stock value or set to 0 if no item is found
-        setSelectedItemPrice(selectedItem?.price||0);
+        setSelectedItemPrice(selectedItem?.price || 0);
     };
     if (!isOpen) return null;
 
@@ -93,7 +93,7 @@ const Modal: React.FC<any> = ({
                                 type="number"
                                 name="stock"
                                 min={0}
-                                onChange={(e)=>setStockCount(e.target.value)}
+                                onChange={(e) => setStockCount(e.target.value)}
                                 max={selectedItemStock} // Dynamically set max value
                                 defaultValue={typeOfForm === "Edit" ? customerData.stock : ""}
                                 required
@@ -107,7 +107,7 @@ const Modal: React.FC<any> = ({
                         </div>
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">
-                                 Price
+                                Price
                             </label>
                             <input
                                 type="text"
@@ -120,14 +120,14 @@ const Modal: React.FC<any> = ({
                         </div>
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">
-                               Total Price
+                                Total Price
                             </label>
                             <input
                                 type="text"
                                 name="totalPrice"
                                 defaultValue={typeOfForm === 'Edit' ? customerData.price : ''}
                                 required
-                                value={selectedItemPrice*stockCount}
+                                value={selectedItemPrice * stockCount}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                             />
                         </div>
@@ -152,34 +152,71 @@ const Modal: React.FC<any> = ({
         </div>
     );
 };
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export const SalesContent = () => {
     const [modalType, setModalType] = useState<'Add' | 'Edit'>('Add');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [filteredSales, setFilteredSales] = useState<any>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-    const sales = [
-        { id: 'SL001', customer: 'John Doe', items: 3, total: '$899', date: '2024-03-15' },
-        { id: 'SL002', customer: 'Jane Smith', items: 2, total: '$459', date: '2024-03-14' },
-        { id: 'SL003', customer: 'Mike Johnson', items: 5, total: '$1,299', date: '2024-03-13' },
-    ];
+    const [sales, setSales] = useState([])
+    const getSales = async () => {
+        const response = await salesReport()
+        console.log(response, ':response of the sales')
+        setSales(response)
+        setFilteredSales(response)
+    }
+    const generatePDF = () => {
+        const doc = new jsPDF();
+        doc.text("Sales Report", 14, 20);
+
+        const tableData = sales.map((sale, index) => [
+            index + 1,
+            sale.customerId?.name || sale.customer || "N/A",
+            sale.itemId?.name || "N/A",
+            `$${sale.totalPrice || 0}`,
+            sale.saleDate ? new Date(sale.saleDate).toLocaleDateString() : "N/A",
+        ]);
+
+        doc.autoTable({
+            head: [["#", "Customer", "Item", "Total Price", "Date"]],
+            body: tableData,
+            startY: 30,
+        });
+
+        doc.save("Sales_Report.pdf");
+    };
+
+    useEffect(() => {
+        getSales()
+    }, [])
     const handleAddCustomer = async (saleData: any, typeOfForm: string) => {
         console.log(saleData)
         if (typeOfForm === 'Add') {
-          const response = await placeorder(saleData,saleData.customer);
-            console.log(response,':placeorder')
-      
-        } 
-        // else if (typeOfForm === 'Edit') {
-        //   // Update logic for customer goes here
-        //   console.log('Edit customer:', customer);
-        //   const response = await editCustomer(customer,selectedCustomer.id)
-        //   if(response){
-        //     const res = await getAllCustomer();
-        //     setCustomers(res);
-        //   }
-        // }
+            const response = await placeorder(saleData, saleData.customer, saleData.item);
+            console.log(response, ':placeorder')
+            getSales()
+        }
+        else if (typeOfForm === 'Edit') {
+
+
+            const response = await editSaleReport(saleData, saleData.customer, saleData.item, selectedCustomer.id)
+            console.log(response, 'edit sale')
+            getSales()
+            //   if(response){
+            //     const res = await getAllCustomer();
+            //     setCustomers(res);
+            //   }
+        }
         setIsModalOpen(false);
     };
+    const handleDeleteSale= async(saleId:string)=>{
+        console.log(saleId,'the sale id')
+        const response = await deleteSaleReport(saleId)
+        getSales()
+    }
     const handleEditCustomer = (customer: any) => {
         setSelectedCustomer(customer);
         setModalType('Edit');
@@ -189,7 +226,7 @@ export const SalesContent = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Sales Overview</h2>
+                <h2 className="text-2xl font-bold text-white">Sales Overv</h2>
                 <div className="flex space-x-4">
                     <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2">
                         <BarChart3 className="h-5 w-5" />
@@ -203,7 +240,14 @@ export const SalesContent = () => {
                         <Plus className="h-5 w-5" />
                         <span>New Sale</span>
                     </button>
+                    <button
+  onClick={generatePDF}
+  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold"
+>
+  Download Report
+</button>
                 </div>
+                
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -234,6 +278,7 @@ export const SalesContent = () => {
                 headers={['ID', 'Customer', 'Items', 'Total', 'Date']}
                 data={sales}
                 editModal={handleEditCustomer}
+                deletModal={handleDeleteSale}
             />
             <Modal
                 isOpen={isModalOpen}
@@ -242,6 +287,81 @@ export const SalesContent = () => {
                 typeOfForm={modalType}
                 customerData={selectedCustomer}
             />
+        </div>
+    );
+};
+const Table: React.FC<any> = ({
+    headers,
+    data,
+    actions = true,
+    editModal,
+    deletModal
+}) => {
+    
+    const deleteSales = async(saleId:string) => {
+        if (window.confirm('Are you sure you want to delete this customer?')) {
+          // Call API or handle deletion logic here
+          console.log(`Customer with ID ${saleId} deleted.`);
+        //   const response = await deleteSaleReport(saleId)
+        //   console.log('the deleted data:',response)
+          
+            deletModal(saleId)
+            // setData((prevData:any) => prevData.filter((sale) => sale.id !== saleId));
+          
+          // Optionally, remove the customer from local state or refresh the data
+        }
+      };
+    return (
+        <div className="bg-gray-800 rounded-xl overflow-x-auto">
+            <table className="w-full">
+                <thead>
+                    <tr className="bg-gray-700">
+                        {headers.map((header, index) => (
+                            <th
+                                key={index}
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                            >
+                                {header}
+                            </th>
+                        ))}
+                        {actions && <th className="px-6 py-3 text-right">Actions</th>}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                    {data.map((sales, index) => (
+                        <tr key={index} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4">#{String(sales.id).slice(-4)}</td>
+
+                            {sales.customerId&&sales.customerId.name && <td className="px-6 py-4">{sales.customerId.name}</td>}
+                            {sales.customer && <td className="px-6 py-4">{sales.customer}</td>}
+                            {sales.itemId.name && <td className="px-6 py-4">{sales.itemId.name}</td>}
+                            {sales.totalPrice && <td className="px-6 py-4">{sales.totalPrice}</td>}
+                            {sales.saleDate && <td className="px-6 py-4">{new Date(sales.saleDate).toLocaleDateString()}</td>}
+                            {actions && (<>
+                                <td className="px-6 py-4 text-right">
+                                    <button
+                                        onClick={() => editModal(sales)}
+                                        className="text-blue-400 hover:text-blue-300 mx-2"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => deleteSales(sales.id)}
+                                        className="text-red-400 hover:text-red-300 mx-2"
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+
+
+
+
+                            </>
+                            )}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
