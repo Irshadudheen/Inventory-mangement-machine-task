@@ -13,13 +13,14 @@ router.patch('/api/customer/:customerId',[
 ],validateRequest,requireAuth,currentUser,
 async(req:Request,res:Response)=>{
     const {customerId}=req.params;
-    const {name}=req.body;
+    const {name,email}=req.body;
     console.log('entered name',name)
     const customer = await Customer.findOne({_id:customerId})
     if(!customer){
         throw new BadRequestError('Customer not found')
     }
     customer.name=name||customer.name;
+    customer.email=email||customer.email;
     await customer.save();
     res.status(200).send(customer)
 }

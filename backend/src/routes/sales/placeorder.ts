@@ -5,6 +5,7 @@ import { requireAuth } from "../../middlewares/require-auth";
 import { currentUser } from "../../middlewares/current-user";
 import { BadRequestError } from "../../errors/bad-request-error";
 import { Sales } from "../../models/sales";
+import { Item } from "../../models/InventoryItems";
 
 const router = Router()
 router.post('/api/sales/placeorder/:customerId/:itemId',[
@@ -21,6 +22,15 @@ router.post('/api/sales/placeorder/:customerId/:itemId',[
     if(!req.currentUser||!req.currentUser.id){
         throw new BadRequestError('user not login')
     }
+    const item =await Item.findById(itemId);
+    if(!item){
+        throw new BadRequestError('item not found')
+    }
+    if(!item.stock){
+        throw new BadRequestError('item stock is empty')
+    }
+    item.stock=item.stock-stock
+    await item.save()
     const order = Sales.build({customerId,price,stock,totalPrice,userId:req.currentUser.id,itemId,saleDate:Date.now()})
     await order.save()
     res.status(201).send(order)

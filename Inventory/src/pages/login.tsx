@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { userLoing, userSignUp } from '../Api/user';
+import toast from 'react-hot-toast';
 
 
 const AuthForm = () => {
@@ -27,13 +28,29 @@ const AuthForm = () => {
     // Handle form submission logic here
     console.log(isLogin,'login format')
     if(isLogin){
+      try {
+        
         const res = await userLoing(formData)
         console.log(res)
-         window.location.href='/'
+        window.location.href='/'
+      
+      } catch (error:any) {
+        toast.error(error.response.data.errors[0].message)
+        console.log(error);
+      }
        
     }else{
+      try {
+       if(formData.confirmPassword!==formData.password){
+        toast.error('passwrod and confirm  is not match')
+        return
+       } 
         const response = await userSignUp(formData)
         console.log(response)
+      } catch (error:any) {
+        toast.error(error.response.data.errors[0].message)
+        console.log(error.response.data.errors[0].message)
+      }
     }
     console.log('Form submitted:', formData);
   };

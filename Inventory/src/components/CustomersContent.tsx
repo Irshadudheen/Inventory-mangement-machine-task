@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DashboardCard, Table } from './DashboardContent';
 import { Plus, Users, TrendingUp ,Search } from 'lucide-react';
 import { createCustomer, editCustomer, getAllCustomer } from '../Api/customer';
+import toast from 'react-hot-toast';
 
 const Modal: React.FC<any> = ({
   isOpen,
@@ -100,6 +101,7 @@ export const CustomersContent = () => {
     if (typeOfForm === 'Add') {
       const response = await createCustomer(customer);
       setCustomers((prev: any) => [...prev, response]);
+      toast.success('added customer')
     } else if (typeOfForm === 'Edit') {
       // Update logic for customer goes here
       console.log('Edit customer:', customer);
@@ -107,6 +109,7 @@ export const CustomersContent = () => {
       if(response){
         const res = await getAllCustomer();
         setCustomers(res);
+        toast.success('edit customer')
       }
     }
     setIsModalOpen(false);

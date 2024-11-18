@@ -3,7 +3,7 @@ import { DashboardCard } from "./DashboardContent";
 import { useEffect, useState } from "react";
 import { getAllCustomer } from "../Api/customer";
 import { getAllItem } from "../Api/item";
-import { deleteSaleReport, editSaleReport, placeorder, salesReport } from "../Api/sales";
+import {  editSaleReport, placeorder, salesReport } from "../Api/sales";
 const Modal: React.FC<any> = ({
     isOpen,
     onClose,
@@ -11,8 +11,8 @@ const Modal: React.FC<any> = ({
     typeOfForm,
     customerData = {},
 }) => {
-    const [customer, setCustomer] = useState([]);
-    const [item, setItem] = useState([]);
+    const [customer, setCustomer] = useState<any>([]);
+    const [item, setItem] = useState<any>([]);
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
@@ -28,12 +28,12 @@ const Modal: React.FC<any> = ({
         }
         fetchCustomers()
     }, [])
-    const [selectedItemStock, setSelectedItemStock] = useState(null);
-    const [selectedItemPrice, setSelectedItemPrice] = useState(null)
-    const [stockCount, setStockCount] = useState(null)
-    const handleItemChange = (event) => {
+    const [selectedItemStock, setSelectedItemStock] = useState<any>(null);
+    const [selectedItemPrice, setSelectedItemPrice] = useState<any>(null)
+    const [stockCount, setStockCount] = useState<any>(null)
+    const handleItemChange = (event:any) => {
         const selectedItemId = event.target.value;
-        const selectedItem = item.find((item) => item.id === selectedItemId);
+        const selectedItem:any = item.find((item:any) => item.id === selectedItemId);
         setSelectedItemStock(selectedItem?.stock || 0); // Update stock value or set to 0 if no item is found
         setSelectedItemPrice(selectedItem?.price || 0);
     };
@@ -161,7 +161,7 @@ export const SalesContent = () => {
     const [filteredSales, setFilteredSales] = useState<any>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-    const [sales, setSales] = useState([])
+    const [sales, setSales] = useState<any>([])
     const getSales = async () => {
         const response = await salesReport()
         console.log(response, ':response of the sales')
@@ -169,7 +169,7 @@ export const SalesContent = () => {
         setFilteredSales(response)
     }
     const generatePDF = () => {
-        const doc = new jsPDF();
+        const doc:any = new jsPDF();
         doc.text("Sales Report", 14, 20);
 
         const tableData = sales.map((sale, index) => [
@@ -188,7 +188,14 @@ export const SalesContent = () => {
 
         doc.save("Sales_Report.pdf");
     };
-
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        const filtered = sales.filter((sale:any) =>
+            sale.customerId?.name?.toLowerCase().includes(query.toLowerCase()) ||
+            sale.customer?.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredSales(filtered);
+    };
     useEffect(() => {
         getSales()
     }, [])
@@ -200,38 +207,32 @@ export const SalesContent = () => {
             getSales()
         }
         else if (typeOfForm === 'Edit') {
-
-
             const response = await editSaleReport(saleData, saleData.customer, saleData.item, selectedCustomer.id)
             console.log(response, 'edit sale')
             getSales()
-            //   if(response){
-            //     const res = await getAllCustomer();
-            //     setCustomers(res);
-            //   }
+
         }
         setIsModalOpen(false);
     };
-    const handleDeleteSale= async(saleId:string)=>{
-        console.log(saleId,'the sale id')
-        const response = await deleteSaleReport(saleId)
-        getSales()
-    }
+
     const handleEditCustomer = (customer: any) => {
         setSelectedCustomer(customer);
         setModalType('Edit');
         setIsModalOpen(true);
     };
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">Sales Overv</h2>
                 <div className="flex space-x-4">
-                    <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2">
-                        <BarChart3 className="h-5 w-5" />
-                        <span>Reports</span>
-                    </button>
+                <input
+                        type="text"
+                        placeholder="Search by Customer Name"
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="px-4 py-2 rounded-lg border focus:ring focus:ring-blue-300"
+                    />
+                   
                     <button onClick={() => {
                         setModalType('Add');
                         setSelectedCustomer(null);
@@ -241,15 +242,13 @@ export const SalesContent = () => {
                         <span>New Sale</span>
                     </button>
                     <button
-  onClick={generatePDF}
-  className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold"
->
-  Download Report
-</button>
+                        onClick={generatePDF}
+                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold"
+                    >
+                        Download Report
+                    </button>
                 </div>
-                
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <DashboardCard
                     title="Total Sales"
@@ -275,10 +274,10 @@ export const SalesContent = () => {
             </div>
 
             <Table
-                headers={['ID', 'Customer', 'Items', 'Total', 'Date']}
-                data={sales}
+                headers={['ID', 'Customer', 'Items', "stock", 'Total amount', 'Date']}
+                data={filteredSales}
                 editModal={handleEditCustomer}
-                deletModal={handleDeleteSale}
+             
             />
             <Modal
                 isOpen={isModalOpen}
@@ -293,24 +292,7 @@ export const SalesContent = () => {
 const Table: React.FC<any> = ({
     headers,
     data,
-    actions = true,
-    editModal,
-    deletModal
 }) => {
-    
-    const deleteSales = async(saleId:string) => {
-        if (window.confirm('Are you sure you want to delete this customer?')) {
-          // Call API or handle deletion logic here
-          console.log(`Customer with ID ${saleId} deleted.`);
-        //   const response = await deleteSaleReport(saleId)
-        //   console.log('the deleted data:',response)
-          
-            deletModal(saleId)
-            // setData((prevData:any) => prevData.filter((sale) => sale.id !== saleId));
-          
-          // Optionally, remove the customer from local state or refresh the data
-        }
-      };
     return (
         <div className="bg-gray-800 rounded-xl overflow-x-auto">
             <table className="w-full">
@@ -324,40 +306,18 @@ const Table: React.FC<any> = ({
                                 {header}
                             </th>
                         ))}
-                        {actions && <th className="px-6 py-3 text-right">Actions</th>}
-                    </tr>
+         </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                    {data.map((sales, index) => (
+                    {data.map((sales:any, index:any) => (
                         <tr key={index} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                             <td className="px-6 py-4">#{String(sales.id).slice(-4)}</td>
-
-                            {sales.customerId&&sales.customerId.name && <td className="px-6 py-4">{sales.customerId.name}</td>}
+                            {sales.customerId && sales.customerId.name && <td className="px-6 py-4">{sales.customerId.name}</td>}
                             {sales.customer && <td className="px-6 py-4">{sales.customer}</td>}
                             {sales.itemId.name && <td className="px-6 py-4">{sales.itemId.name}</td>}
+                            {sales.stock && <td className="px-6 py-4">{sales.stock}</td>}
                             {sales.totalPrice && <td className="px-6 py-4">{sales.totalPrice}</td>}
                             {sales.saleDate && <td className="px-6 py-4">{new Date(sales.saleDate).toLocaleDateString()}</td>}
-                            {actions && (<>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        onClick={() => editModal(sales)}
-                                        className="text-blue-400 hover:text-blue-300 mx-2"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => deleteSales(sales.id)}
-                                        className="text-red-400 hover:text-red-300 mx-2"
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-
-
-
-
-                            </>
-                            )}
                         </tr>
                     ))}
                 </tbody>
